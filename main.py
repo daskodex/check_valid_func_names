@@ -67,6 +67,6 @@ def check_valid_func_names(user_file_name: str) -> int:
 
 
 if __name__ == "__main__":
-    file_name = 'tests/test_student_work_1.py'
+    file_name = 'students_works/test_student_work_ok.py'
     result = check_valid_func_names(file_name)
     print(f'Check errors: {result}')
