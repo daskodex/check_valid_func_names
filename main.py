@@ -46,7 +46,7 @@ def check_valid_func_names(user_file_name: str) -> int:
 
     errors_list = []
 
-    """ Проверяем в каком регистре находится первая буква именя функции внутри класса"""
+    """ Проверяем в каком регистре находится первая буква названия функции\метода внутри класса """
     for class_name, class_data in inspect.getmembers(foo, inspect.isclass):
         for class_function_name, class_function_data in inspect.getmembers(class_data, inspect.isfunction):
             if not class_function_name.startswith('__'):
@@ -54,7 +54,7 @@ def check_valid_func_names(user_file_name: str) -> int:
                     check_error = 1
                     errors_list.append(class_function_name)
 
-    """ Проверяем в каком регистре находится первая буква имени функции вне классов"""
+    """ Проверяем в каком регистре находится первая буква имени функции вне классов """
     for function_name, function_data in inspect.getmembers(foo, inspect.isfunction):
         if not function_name.startswith('__'):
             if not function_name[0] in upper_case_chars:
