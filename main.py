@@ -25,6 +25,7 @@ import inspect
 import importlib.util
 import sys
 
+
 def check_valid_func_names(user_file_name: str) -> int:
     """Функция проверяет соответствие названий функций, классов и функицй классов"""
 
@@ -60,7 +61,7 @@ def check_valid_func_names(user_file_name: str) -> int:
                 check_error = 1
                 errors_list.append(function_name)
 
-    print(errors_list)
+    #print(errors_list)
 
     return check_error
 
