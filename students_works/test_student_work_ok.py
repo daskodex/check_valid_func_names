@@ -10,6 +10,8 @@ class Triangle():
     def method_two(self):
         pass
 
+
+
 #Пример кода, где Правило не выполняется
 def TriangleFactory():
     print('hello')
