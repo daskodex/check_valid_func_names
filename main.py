@@ -1,27 +1,18 @@
 """
 Для реализации решения используйте python 3.8
 
-По нашему Правилу обучающиеся в присылаемых решениях должны имена всех
-функций/методов, определенных внутри класса, начинать только с маленькой
-латинской буквы, а имена функций, определенных вне класса, начинать только с
-большой латинской буквы. Решение студента поступает к нам в виде .py файла.
-
-При этом мы не знаем, будет ли код, написанный студентом, синтаксически
-корректным. Разработайте скрипт проверки Правила, которому на вход будет
-подаваться файл со студенческим кодом; при корректном коде и выполнении
-Правила выходное значение скрипта должно быть равно 0, во всех остальных
-случаях 1.
-
-
 Правила валидации:
 1.Имена всех функций/методов, определенных внутри класса, начинать только с маленькой
 латинской буквы
 
 2.Имена функций, определенных вне класса, начинать только большой латинской буквы
 
+3.При этом мы не знаем, будет ли код, написанный студентом, синтаксически
+корректным
+
 Новые вводные:
 
-- учитывал возможную вложенность
+- учитывал возможную вложенность [x]
 - учитывал возможно некорректный синтаксис [x]
 - и просьба обратить внимание на возможности стандартной библиотеки [x]
 
@@ -34,16 +25,7 @@
 
 """
 
-import ast
-
-lower_case_chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
-                    'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
-                    's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-
-upper_case_chars = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
-                    'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-                    'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-
+import ast, re
 
 def check_valid_functions_names(user_file_name: str) -> int:
     """new function for class and function validation"""
@@ -51,27 +33,34 @@ def check_valid_functions_names(user_file_name: str) -> int:
     errors_log = []
     first_level_functions_id = []
 
+    upper_case_chars = re.compile("[A-Z]")
+    lower_case_chars = re.compile("[a-z]")
+
     try:
         with open(user_file_name, "r", encoding="utf-8") as source:
             node = ast.parse(source.read(), mode='exec')
     except SyntaxError:
         return 1
 
-    """ ищем функции вне классов """
-    functions = [n for n in node.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
-    for function in functions:
-        if not function.name[0] in upper_case_chars:
-            errors_log.append(f'Bad function name (outside class): {function.name} wrong char "{function.name[0]}" ')
-            check_error = 1
-        first_level_functions_id.append(id(function))
+    """ ищем функции вне классов без вложенности """
+    for function in node.body:
+        if isinstance(function, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if not upper_case_chars.match(function.name[0]):
+                errors_log.append(f'Bad function name (outside class): {function.name} wrong char "{function.name[0]}" ')
+                check_error = 1
+            first_level_functions_id.append(id(function))
 
     """ ищем все функции произвольной вложенности """
-    for node in ast.walk(node):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            if not id(node) in first_level_functions_id:
-                if not node.name[0] in lower_case_chars:
-                    errors_log.append(f'Bad function name (inside class): {node.name} wrong char "{node.name[0]}" ')
+    for sub_node in ast.walk(node):
+        if isinstance(sub_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if not id(sub_node) in first_level_functions_id:
+                if not lower_case_chars.match(sub_node.name[0]):
+                    errors_log.append(f'Bad function name (inside class): {sub_node.name} wrong char "{sub_node.name[0]}" ')
                     check_error = 1
+
+    for snode in ast.walk(node):
+        for child in ast.iter_child_nodes(snode):
+            child.parent = snode
 
     # print(ast.dump(node, indent=4,annotate_fields=False))
     print('\n'.join(errors_log))
