@@ -14,7 +14,6 @@ def triangleFactory():
     print('hello')
     print('world')
 
-
 class Round():
     def _method_one(self):
         pass
@@ -23,3 +22,7 @@ class Round():
 
     class sub_Class:
         pass
+
+
+class Square:
+    pass
