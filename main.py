@@ -25,13 +25,14 @@
 
 """
 
-import ast, re
+import ast
+import re
+
 
 def check_valid_functions_names(user_file_name: str) -> int:
     """new function for class and function validation"""
     check_error = 0
     errors_log = []
-    first_level_functions_id = []
 
     upper_case_chars = re.compile("[A-Z]")
     lower_case_chars = re.compile("[a-z]")
@@ -42,28 +43,49 @@ def check_valid_functions_names(user_file_name: str) -> int:
     except SyntaxError:
         return 1
 
-    """ ищем функции вне классов без вложенности """
-    for function in node.body:
-        if isinstance(function, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            if not upper_case_chars.match(function.name[0]):
-                errors_log.append(f'Bad function name (outside class): {function.name} wrong char "{function.name[0]}" ')
-                check_error = 1
-            first_level_functions_id.append(id(function))
+    objects_id_type = {}
+
+    """ формируем словарь тип родителя <-> id ребенка """
+    for parent_node in ast.walk(node):
+        for child_node in ast.iter_child_nodes(parent_node):
+            parent_type = ''
+
+            if isinstance(parent_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                parent_type = 'function'
+
+            if isinstance(parent_node, ast.ClassDef):
+                parent_type = 'class'
+
+            """ делаем словарь id объекта : тип родителя ('',class,function)"""
+            objects_id_type[id(child_node)] = parent_type
 
     """ ищем все функции произвольной вложенности """
     for sub_node in ast.walk(node):
+        """ ищем функции """
         if isinstance(sub_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            if not id(sub_node) in first_level_functions_id:
-                if not lower_case_chars.match(sub_node.name[0]):
-                    errors_log.append(f'Bad function name (inside class): {sub_node.name} wrong char "{sub_node.name[0]}" ')
+            parent_type = ''
+            if id(sub_node) in objects_id_type:
+                parent_type = objects_id_type[id(sub_node)]
+
+            if parent_type == '' or parent_type == 'function':
+                if not upper_case_chars.match(sub_node.name[0]):
+                    errors_log.append(f'Bad f-name {sub_node.name} wrong char "{sub_node.name[0]}" ')
                     check_error = 1
 
-    for snode in ast.walk(node):
-        for child in ast.iter_child_nodes(snode):
-            child.parent = snode
+        """ ищем классы """
+        if isinstance(sub_node, ast.FunctionDef):
+            parent_type = ''
+            if id(sub_node) in objects_id_type:
+                parent_type = objects_id_type[id(sub_node)]
 
-    # print(ast.dump(node, indent=4,annotate_fields=False))
-    print('\n'.join(errors_log))
+            if parent_type == 'class':
+                if not lower_case_chars.match(sub_node.name[0]):
+                    errors_log.append(f'Bad f-name {sub_node.name} INSIDE CLASS wrong char "{sub_node.name[0]}" ')
+                    check_error = 1
+
+
+    #print(ast.dump(node, indent=4,annotate_fields=False))
+    #print('\n'.join(errors_log))
 
     return check_error
 
