@@ -16,6 +16,12 @@ def triangleFactory():
     print('hello')
     print('world')
 
+    def newFactory():
+        pass
+
+def GoodFunc():
+    print('hello')
+    print('world')
 
 class Round():
     def _method_one(self):
