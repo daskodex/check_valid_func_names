@@ -41,6 +41,9 @@ class Round():
         def Method_four(self):
             pass
 
+        class SubClassExample_2():
+            def ю_method_three(self):
+                pass
 
 class Square:
     pass
