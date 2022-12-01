@@ -49,7 +49,7 @@ def check_valid_functions_names(user_file_name: str) -> int:
     """new function for class and function validation"""
     check_error = 0
     errors_log = []
-    functions_id = []
+    first_level_functions_id = []
 
     try:
         with open(user_file_name, "r", encoding="utf-8") as source:
@@ -58,23 +58,20 @@ def check_valid_functions_names(user_file_name: str) -> int:
         return 1
 
     """ ищем функции вне классов """
-    functions = [n for n in node.body if isinstance(n, ast.FunctionDef)]
+    functions = [n for n in node.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
     for function in functions:
         if not function.name[0] in upper_case_chars:
             errors_log.append(f'Bad function name (outside class): {function.name} wrong char "{function.name[0]}" ')
             check_error = 1
-        functions_id.append(id(function))
+        first_level_functions_id.append(id(function))
 
     """ ищем все функции произвольной вложенности """
-    all_functions = [node
-        for node in ast.walk(node)
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-    ]
-    for func in all_functions:
-        if not id(func) in functions_id:
-            if not func.name[0] in lower_case_chars:
-                errors_log.append(f'Bad function name (inside class): {func.name} wrong char "{func.name[0]}" ')
-                check_error = 1
+    for node in ast.walk(node):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if not id(node) in first_level_functions_id:
+                if not node.name[0] in lower_case_chars:
+                    errors_log.append(f'Bad function name (inside class): {node.name} wrong char "{node.name[0]}" ')
+                    check_error = 1
 
     # print(ast.dump(node, indent=4,annotate_fields=False))
     print('\n'.join(errors_log))
