@@ -22,48 +22,65 @@
 Новые вводные:
 
 - учитывал возможную вложенность
-- учитывал возможно некорректный синтаксис
+- учитывал возможно некорректный синтаксис [x]
 - и просьба обратить внимание на возможности стандартной библиотеки [x]
+
+Комментарии от сотрудников Яндекса:
+
+>Включил в код прям перечень Больших и маленьких букв. Для кейсов со
+ вложенностью классов не будет работать.
+
+>Исполняет код студента - не сработает при синтаксической или динамической ошибке
 
 """
 
 import ast
 
-# def show_info(functionNode):
-#     print("Function name:", functionNode.name)
-#     print("Args List:")
-#     for arg in functionNode.args.args:
-#         #import pdb; pdb.set_trace()
-#         print("\tParameter name:", arg.arg)
+lower_case_chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
+                    'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+                    's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+upper_case_chars = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
+                    'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+                    'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
 
 def check_valid_functions_names(user_file_name: str) -> int:
     """new function for class and function validation"""
     check_error = 0
     errors_log = []
+    functions_id = []
 
-    with open(user_file_name, "r", encoding="utf-8") as source:
-        node = ast.parse(source.read(), mode='exec')
+    try:
+        with open(user_file_name, "r", encoding="utf-8") as source:
+            node = ast.parse(source.read(), mode='exec')
+    except SyntaxError:
+        return 1
 
+    """ ищем функции вне классов """
     functions = [n for n in node.body if isinstance(n, ast.FunctionDef)]
-    classes = [n for n in node.body if isinstance(n, ast.ClassDef)]
-
     for function in functions:
-        if not str.isupper(function.name[0]):
-            errors_log.append(f'Bad function name (outside class): { function.name } wrong char "{ function.name[0] }" ')
+        if not function.name[0] in upper_case_chars:
+            errors_log.append(f'Bad function name (outside class): {function.name} wrong char "{function.name[0]}" ')
             check_error = 1
+        functions_id.append(id(function))
 
+    """ ищем все функции произвольной вложенности """
+    all_functions = [node
+        for node in ast.walk(node)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    ]
+    for func in all_functions:
+        if not id(func) in functions_id:
+            if not func.name[0] in lower_case_chars:
+                errors_log.append(f'Bad function name (inside class): {func.name} wrong char "{func.name[0]}" ')
+                check_error = 1
 
-    for class_ in classes:
-         methods = [n for n in class_.body if isinstance(n, ast.FunctionDef)]
-         for method in methods:
-             errors_log.append(f'Bad function name (inside class): {method.name} wrong char "{method.name[0]}" ')
-             check_error = 1
-
-
-    #print(ast.dump(node, indent=4,annotate_fields=False))
+    # print(ast.dump(node, indent=4,annotate_fields=False))
     print('\n'.join(errors_log))
 
     return check_error
+
 
 if __name__ == "__main__":
     file_name = 'c:\\source\\python\\check_valid_func_names\\students_works\\test_student_work_0.py'
