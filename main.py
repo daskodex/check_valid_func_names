@@ -1,11 +1,15 @@
 """
 Для реализации решения используйте python 3.8
 
-Правила валидации:
-1.Имена всех функций/методов, определенных внутри класса, начинать только с маленькой
-латинской буквы
+Формализованное задание:
 
-2.Имена функций, определенных вне класса, начинать только большой латинской буквы
+1.Имена всех функций/методов, определенных внутри класса
++ начинать только с маленькой буквы
++ с латинской буквы
+
+2.Имена функций, определенных вне класса:
++ начинать только большой буквы
++ начинить только с латинской буквы
 
 3.При этом мы не знаем, будет ли код, написанный студентом, синтаксически
 корректным
@@ -19,9 +23,9 @@
 Комментарии от сотрудников Яндекса:
 
 >Включил в код прям перечень Больших и маленьких букв. Для кейсов со
- вложенностью классов не будет работать.
+ вложенностью классов не будет работать [x]
 
->Исполняет код студента - не сработает при синтаксической или динамической ошибке
+>Исполняет код студента - не сработает при синтаксической или динамической ошибке [x]
 
 """
 
@@ -30,7 +34,8 @@ import re
 
 
 def check_valid_functions_names(user_file_name: str) -> int:
-    """new function for class and function validation"""
+    """ new function for class and function validation """
+
     check_error = 0
     errors_log = []
 
@@ -45,7 +50,7 @@ def check_valid_functions_names(user_file_name: str) -> int:
 
     objects_id_type = {}
 
-    """ формируем словарь тип родителя <-> id ребенка """
+    """ формируем словарь objects_id_type: id ребенка <-> тип родителя """
     for parent_node in ast.walk(node):
         for child_node in ast.iter_child_nodes(parent_node):
             parent_type = ''
@@ -56,12 +61,12 @@ def check_valid_functions_names(user_file_name: str) -> int:
             if isinstance(parent_node, ast.ClassDef):
                 parent_type = 'class'
 
-            """ делаем словарь id объекта : тип родителя ('',class,function)"""
+            """ создаем словарь id объекта : тип родителя ('',class,function)"""
             objects_id_type[id(child_node)] = parent_type
 
-    """ ищем все функции произвольной вложенности """
+    """ перебираем все функции произвольной степени вложенности """
     for sub_node in ast.walk(node):
-        """ ищем функции """
+        """ ищем функции\методы """
         if isinstance(sub_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             parent_type = ''
             if id(sub_node) in objects_id_type:
@@ -69,7 +74,7 @@ def check_valid_functions_names(user_file_name: str) -> int:
 
             if parent_type == '' or parent_type == 'function':
                 if not upper_case_chars.match(sub_node.name[0]):
-                    errors_log.append(f'Bad f-name {sub_node.name} wrong char "{sub_node.name[0]}" ')
+                    errors_log.append(f'Bad function name {sub_node.name} wrong char "{sub_node.name[0]}" ')
                     check_error = 1
 
         """ ищем классы """
@@ -80,7 +85,7 @@ def check_valid_functions_names(user_file_name: str) -> int:
 
             if parent_type == 'class':
                 if not lower_case_chars.match(sub_node.name[0]):
-                    errors_log.append(f'Bad f-name {sub_node.name} INSIDE CLASS wrong char "{sub_node.name[0]}" ')
+                    errors_log.append(f'Bad function {sub_node.name} INSIDE CLASS wrong char "{sub_node.name[0]}" ')
                     check_error = 1
 
 
