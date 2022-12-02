@@ -26,29 +26,4 @@
 Правила выходное значение скрипта должно быть равно 0, во всех остальных
 случаях 1.
 
-Примеры:
-#Пример кода где Правило выполняется
-def CircleFactory():
-print('hello')
-print('world')
-
-class Triangle():
-def method_one(self):
-pass
-def method_two(self):
-pass
-
-#Пример кода, где Правило не выполняется
-def triangleFactory():
-print('hello')
-print('world')
-
-Тестовое задание 2
-class Round():
-def _method_one(self):
-pass
-def method_two(self):
-pass
-
-
 Дорофеев Владимир, эл.почта daskodex@gmail.com, tg: @daskodex
