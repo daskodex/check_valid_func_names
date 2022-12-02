@@ -75,7 +75,7 @@ def check_valid_functions_names(user_file_name: str, print_log: int = 0) -> int:
 
             if parent_type == '' or parent_type == 'function':
                 if not upper_case_chars.match(sub_node.name[0]):
-                    errors_log.append(f'Bad function name {sub_node.name} wrong char "{sub_node.name[0]}" ')
+                    errors_log.append(f'{sub_node.lineno} Bad function name {sub_node.name} wrong char "{sub_node.name[0]}" ')
                     check_error = 1
 
         """ ищем классы """
@@ -86,7 +86,7 @@ def check_valid_functions_names(user_file_name: str, print_log: int = 0) -> int:
 
             if parent_type == 'class':
                 if not lower_case_chars.match(sub_node.name[0]):
-                    errors_log.append(f'Bad function {sub_node.name} INSIDE CLASS wrong char "{sub_node.name[0]}" ')
+                    errors_log.append(f'{sub_node.lineno} Bad function {sub_node.name} INSIDE CLASS wrong char "{sub_node.name[0]}" ')
                     check_error = 1
 
     if print_log == 1:
@@ -99,6 +99,6 @@ def check_valid_functions_names(user_file_name: str, print_log: int = 0) -> int:
 if __name__ == "__main__":
     file_name = 'c:\\source\\python\\check_valid_func_names\\students_works\\test_student_work_0.py'
 
-    result = check_valid_functions_names(file_name)
+    result = check_valid_functions_names(file_name,1)
 
     print(f'Check errors: {result}')
