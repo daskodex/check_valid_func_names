@@ -37,8 +37,7 @@ def check_valid_functions_names(user_file_name: str, print_log: int = 0) -> int:
     """ new function for class and function validation """
 
     check_error = 0
-    errors_log = []
-    errors_log.append(user_file_name)
+    errors_log = [user_file_name]
 
     upper_case_chars = re.compile("[A-Z]")
     lower_case_chars = re.compile("[a-z]")
