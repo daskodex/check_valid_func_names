@@ -33,7 +33,7 @@ import ast
 import re
 
 
-def check_valid_functions_names(user_file_name: str) -> int:
+def check_valid_functions_names(user_file_name: str, print_log: int = 0) -> int:
     """ new function for class and function validation """
 
     check_error = 0
@@ -64,8 +64,9 @@ def check_valid_functions_names(user_file_name: str) -> int:
             """ создаем словарь id объекта : тип родителя ('',class,function)"""
             objects_id_type[id(child_node)] = parent_type
 
-    """ перебираем все функции произвольной степени вложенности """
+    """ перебираем все функции и классы произвольной степени вложенности """
     for sub_node in ast.walk(node):
+
         """ ищем функции\методы """
         if isinstance(sub_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             parent_type = ''
@@ -88,14 +89,16 @@ def check_valid_functions_names(user_file_name: str) -> int:
                     errors_log.append(f'Bad function {sub_node.name} INSIDE CLASS wrong char "{sub_node.name[0]}" ')
                     check_error = 1
 
-
-    #print(ast.dump(node, indent=4,annotate_fields=False))
-    #print('\n'.join(errors_log))
+    if print_log == 1:
+        print(ast.dump(node, indent=4, annotate_fields=False))
+        print('\n'.join(errors_log))
 
     return check_error
 
 
 if __name__ == "__main__":
     file_name = 'c:\\source\\python\\check_valid_func_names\\students_works\\test_student_work_0.py'
+
     result = check_valid_functions_names(file_name)
+
     print(f'Check errors: {result}')
